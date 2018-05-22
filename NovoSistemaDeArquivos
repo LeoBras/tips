@@ -1,0 +1,43 @@
+#Para gerar o novo sistema de arquivos deve ser usado o Debootstrap (Debian based Distros)
+
+#Esse metodo precisa de permissão de super-usuario. Para solucionar o problema, há duas possibilidades:
+## Entrar como root:
+sudo su #ou simplesmente 'su' se voce possuir a senha de root.
+##Usar o sudo: Basta adicionar um sudo antes de cada comando.
+
+#criando uma pasta para se organizar.
+mkdir Debootstrap
+cd Debootstrap
+
+#Instalando a máquina virtual ARM e o programa Debootstrap
+apt-get install binfmt-support qemu qemu-user-static debootstrap
+
+#Usando o repositorio debian do sft, foi ordenado criar um sistema de arquivos básico e foram baixados pacotes básicos para aquitetura ARMEL, na versão WHEEZY na pasta debian_armel_wheezy.
+debootstrap --foreign --arch armel wheezy debian_armel_wheezy http://sft.if.usp.br/debian/
+
+#É feita a cópia do emulador para que ele continue rodando após o chroot
+cp /usr/bin/qemu-arm-static debian_armel_wheezy/usr/bin
+
+#O comando a seguir exporta algumas variaveis e usa o comando chroot para iniciar a emulação de um micro arm, assim pode-se iniciar a instalação.
+DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true LC_ALL=C LANGUAGE=C LANG=C chroot debian_armel_wheezy/
+
+#Instala-se todos os pacotes DEB baixados com o comando debootstrap
+dpkg --force-all -i /var/cache/apt/archives/*.deb
+
+# Comente esta linha (coloque um # antes de rmdir) caso ocorra erro no base-files.
+# O comando a seguir te leva diretamente na linha 30, que precisa ser comentada.
+nano +30 /var/lib/dpkg/info/base-files.postinst 
+#ctrl+o para salvar e ctrl+x para sair.
+
+#Adiciona o repositório SFT do IF na lista de repositórios.
+echo "deb http://sft.if.usp.br/debian wheezy main contrib non-free" > /etc/apt/sources.list
+#Baixa a listagem do repositório e realiza as atualizações, além de corrigir os problemas com o base-files.
+apt-get update && apt-get dist-upgrade -y
+exit
+
+## A parte de baixo ainda não foi testada.
+
+#Após isso, basta copiar a pasta debian_armel_wheezy/ para um pendrive com particao ext3 ou usar os comandos a seguir para fazer um aquivo jffs2:
+mkfs.jffs2 --root="debian_armel_wheezy/" -e128KiB -n -p -o"temporary-image.tmp"
+sumtool -e128KiB -n -p -i"temporary-image.tmp" -o"meu-jffs2-filesystem.jffs2"
+

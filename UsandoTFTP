@@ -1,0 +1,4 @@
+setenv serverip 10.235.0.130
+setenv ipaddr 10.235.0.136
+tftpboot 22200000 10.235.0.130:uImage-cam
+bootm

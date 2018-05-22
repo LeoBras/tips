@@ -1,0 +1,19 @@
+Para clonar uma partition em um arquivo .img basta fazer o seguinte:
+	dd if=/dev/sdxN of=/meu/aquivo.img
+
+Exemplo: 
+	dd if=/dev/sda2 of=/meu/aquivo.img
+
+
+
+
+
+Caso queira clonar um device (como o pendrive inteiro, por exemplo):
+	dd if=/dev/sdx of=/meu/aquivo.img
+
+Exemplo: 
+	dd if=/dev/sdb of=/meu/aquivo.img
+
+Caso queira restaurar o device ou partition:
+	dd if=/meu/aquivo.img of=/dev/sdxN (partição)
+	dd if=/meu/aquivo.img of=/dev/sdx (device)
